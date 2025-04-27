@@ -55,7 +55,7 @@ function CopyButton({ text, label }: { text: string, label?: string }) {
       setCopied(true);
       toast.success('已复制到剪贴板');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch (_) {
       toast.error('复制失败，请手动复制');
     }
   };

@@ -1,15 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table";
-import { Search, Loader2, Eye, EyeOff, Plus, Save, X, RefreshCw, Info, Key, Lock } from "lucide-react";
+import { Search, Plus, Save, RefreshCw, Key, Lock } from "lucide-react";
 import { toast } from 'sonner';
 import AppLayout from '@/components/layout/AppLayout';
 

@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 // 从 cookie 获取会话
-const getSession = () => {
-  const cookieStore = cookies();
+const getSession = async () => {
+  const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('session');
   
   if (!sessionCookie) {
@@ -21,7 +21,7 @@ const getSession = () => {
 // 获取用户的 GitHub 工作流列表
 export async function GET(request: Request) {
   try {
-    const session = getSession();
+    const session = await getSession();
     if (!session || !session.accessToken) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
 // 触发 GitHub 工作流运行
 export async function POST(request: Request) {
   try {
-    const session = getSession();
+    const session = await getSession();
     if (!session || !session.accessToken) {
       return NextResponse.json({ error: '未授权' }, { status: 401 });
     }

@@ -1,0 +1,120 @@
+name: 定时任务执行
+
+on:
+  schedule:
+    # 设置定时任务执行时间，默认每天北京时间9点执行
+    # UTC时间与北京时间相差8小时，所以这里是1点 (UTC+0)
+    - cron: '0 1 * * *'
+  
+  # 允许手动触发工作流
+  workflow_dispatch:
+    inputs:
+      task:
+        description: '要执行的任务名称'
+        required: false
+        default: 'all'
+      debug:
+        description: '是否开启调试模式'
+        required: false
+        default: 'false'
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      # 检出代码
+      - name: 检出仓库代码
+        uses: actions/checkout@v3
+
+      # 设置Node.js环境
+      - name: 设置Node环境
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      # 设置Python环境
+      - name: 设置Python环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      # 安装依赖
+      - name: 安装依赖
+        run: |
+          npm ci
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+
+      # 执行指定的脚本或全部脚本
+      - name: 执行任务
+        env:
+          # 设置环境变量，您可以在GitHub Secrets中设置这些值
+          API_KEY: ${{ secrets.API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # 其他环境变量...
+        run: |
+          if [[ "${{ github.event.inputs.debug }}" == "true" ]]; then
+            echo "开启调试模式"
+            set -x
+          fi
+
+          if [[ "${{ github.event.inputs.task }}" == "all" || "${{ github.event.inputs.task }}" == "" ]]; then
+            echo "执行所有任务"
+            # 执行脚本目录下的所有脚本
+            # Node.js脚本
+            for script in scripts/*.js; do
+              if [ -f "$script" ]; then
+                echo "执行Node脚本: $script"
+                node "$script"
+              fi
+            done
+            
+            # Python脚本
+            for script in scripts/*.py; do
+              if [ -f "$script" ]; then
+                echo "执行Python脚本: $script"
+                python "$script"
+              fi
+            done
+            
+            # Shell脚本
+            for script in scripts/*.sh; do
+              if [ -f "$script" ]; then
+                echo "执行Shell脚本: $script"
+                chmod +x "$script"
+                bash "$script"
+              fi
+            done
+          else
+            # 执行指定的任务
+            TASK="${{ github.event.inputs.task }}"
+            echo "执行指定任务: $TASK"
+            
+            if [[ $TASK == *.js ]]; then
+              node "scripts/$TASK"
+            elif [[ $TASK == *.py ]]; then
+              python "scripts/$TASK"
+            elif [[ $TASK == *.sh ]]; then
+              chmod +x "scripts/$TASK"
+              bash "scripts/$TASK"
+            else
+              echo "未知的脚本类型: $TASK"
+              exit 1
+            fi
+          fi
+
+      # 推送执行结果到Vercel应用（如果配置了）
+      - name: 推送结果到Vercel
+        if: env.VERCEL_WEBHOOK_URL
+        env:
+          VERCEL_WEBHOOK_URL: ${{ secrets.VERCEL_WEBHOOK_URL }}
+        run: |
+          if [ -n "$VERCEL_WEBHOOK_URL" ]; then
+            echo "推送执行结果到Vercel"
+            curl -X POST "$VERCEL_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{"status": "success", "timestamp": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'", "job_id": "${{ github.run_id }}"}'
+          fi 

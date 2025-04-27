@@ -138,8 +138,12 @@ export default function LoginPage() {
       // 这里会替换为实际的 GitHub OAuth 处理逻辑
       toast.info('正在跳转到 GitHub 授权页面...');
       
-      // 实际部署时需要使用真实的 OAUTH_CLIENT_ID
-      const OAUTH_CLIENT_ID = 'your_github_oauth_client_id';
+      // 使用环境变量中的 GitHub OAuth Client ID
+      const OAUTH_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+      if (!OAUTH_CLIENT_ID) {
+        throw new Error('GitHub OAuth 客户端 ID 未配置');
+      }
+      
       const REDIRECT_URI = encodeURIComponent(window.location.origin + '/api/auth/callback/github');
       const authUrl = `https://github.com/login/oauth/authorize?client_id=${OAUTH_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=repo`;
       

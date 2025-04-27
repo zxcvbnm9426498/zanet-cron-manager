@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getRequiredEnv } from '@/app/lib/env';
 
 // 这个函数将处理GitHub OAuth回调
 export async function GET(request: NextRequest) {
@@ -98,12 +99,8 @@ export async function GET(request: NextRequest) {
 
 // 交换GitHub OAuth代码获取访问令牌的函数
 async function exchangeCodeForToken(code: string) {
-  const clientId = process.env.GITHUB_CLIENT_ID;
-  const clientSecret = process.env.GITHUB_CLIENT_SECRET;
-  
-  if (!clientId || !clientSecret) {
-    throw new Error('GitHub OAuth credentials not configured');
-  }
+  const clientId = getRequiredEnv('GITHUB_CLIENT_ID');
+  const clientSecret = getRequiredEnv('GITHUB_CLIENT_SECRET');
   
   const response = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',

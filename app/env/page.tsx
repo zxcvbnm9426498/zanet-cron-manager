@@ -1,178 +1,218 @@
 'use client';
 
-import { useState } from "react";
-import AppLayout from "@/components/layout/AppLayout";
+import { useState, useEffect } from 'react';
+import AppLayout from '@/components/layout/AppLayout';
 import { 
-  TerminalSquare, 
-  Search, 
-  Plus, 
-  MoreVertical,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
+  Check,
+  Save, 
+  Key, 
   Lock,
-  Key
-} from "lucide-react";
-import { toast } from "sonner";
+  RefreshCw,
+  AlertTriangle,
+  Search
+} from 'lucide-react';
+import { toast } from 'sonner';
+
+// 环境变量类型
+type EnvVar = {
+  id: number;
+  key: string;
+  value: string;
+  description: string;
+  isEncrypted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  isSystem: boolean;
+};
 
 // 模拟数据
-const MOCK_ENV_VARS = [
-  { 
-    id: 1, 
-    name: "API_KEY", 
-    value: "sk-***********************",
-    isSecret: true,
-    created: "2024-06-01 10:30",
-    updated: "2024-06-10 14:22",
+const MOCK_ENV_VARS: EnvVar[] = [
+  {
+    id: 1,
+    key: 'GITHUB_CLIENT_ID',
+    value: 'github_oauth_client_id_value',
+    description: 'GitHub OAuth应用的Client ID',
+    isEncrypted: false,
+    createdAt: '2024-06-01T10:00:00Z',
+    updatedAt: '2024-06-10T15:30:00Z',
+    isSystem: true
   },
-  { 
-    id: 2, 
-    name: "DATABASE_URL", 
-    value: "postgres://user:password@localhost:5432/mydb",
-    isSecret: true,
-    created: "2024-05-20 09:45",
-    updated: "2024-06-08 22:15",
+  {
+    id: 2,
+    key: 'GITHUB_CLIENT_SECRET',
+    value: '******************************',
+    description: 'GitHub OAuth应用的Client Secret',
+    isEncrypted: true,
+    createdAt: '2024-06-01T10:00:00Z',
+    updatedAt: '2024-06-10T15:30:00Z',
+    isSystem: true
   },
-  { 
-    id: 3, 
-    name: "NODE_ENV", 
-    value: "production",
-    isSecret: false,
-    created: "2024-06-05 16:20",
-    updated: "2024-06-09 11:30",
+  {
+    id: 3,
+    key: 'DATABASE_URL',
+    value: 'postgres://username:password@host:5432/dbname',
+    description: '数据库连接URL',
+    isEncrypted: true,
+    createdAt: '2024-06-01T10:00:00Z',
+    updatedAt: '2024-06-05T11:20:00Z',
+    isSystem: true
   },
-  { 
-    id: 4, 
-    name: "PORT", 
-    value: "3000",
-    isSecret: false,
-    created: "2024-05-10 12:00",
-    updated: "2024-06-03 17:42",
-  },
-  { 
-    id: 5, 
-    name: "SMTP_PASSWORD", 
-    value: "********",
-    isSecret: true,
-    created: "2024-06-08 08:15",
-    updated: "2024-06-10 10:10",
+  {
+    id: 4,
+    key: 'MY_CUSTOM_API_KEY',
+    value: '********************************',
+    description: '自定义API密钥',
+    isEncrypted: true,
+    createdAt: '2024-06-08T14:25:00Z',
+    updatedAt: '2024-06-08T14:25:00Z',
+    isSystem: false
   }
 ];
 
-// 环境变量行动作下拉菜单
-function EnvVarActionMenu({ onEdit, onDelete, isSecret, onToggleVisibility }: { 
-  onEdit: () => void; 
-  onDelete: () => void; 
-  isSecret: boolean;
-  onToggleVisibility: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [valueVisible, setValueVisible] = useState(false);
-
-  const handleToggleVisibility = () => {
-    setValueVisible(!valueVisible);
-    onToggleVisibility();
-  };
-
-  return (
-    <div className="relative">
-      <button 
-        onClick={() => setOpen(!open)} 
-        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-      >
-        <MoreVertical className="h-5 w-5 text-gray-500" />
-      </button>
-
-      {open && (
-        <div 
-          className="absolute right-0 z-10 mt-1 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none py-1"
-          onBlur={() => setOpen(false)}
-        >
-          {isSecret && (
-            <button 
-              onClick={() => { handleToggleVisibility(); setOpen(false); }} 
-              className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              {valueVisible ? (
-                <>
-                  <EyeOff className="mr-2 h-4 w-4" />
-                  隐藏值
-                </>
-              ) : (
-                <>
-                  <Eye className="mr-2 h-4 w-4" />
-                  显示值
-                </>
-              )}
-            </button>
-          )}
-          <button 
-            onClick={() => { onEdit(); setOpen(false); }} 
-            className="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            编辑变量
-          </button>
-          <button 
-            onClick={() => { onDelete(); setOpen(false); }} 
-            className="flex w-full items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            删除变量
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function EnvPage() {
+  const [envVars, setEnvVars] = useState<EnvVar[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [visibleValues, setVisibleValues] = useState<Record<number, boolean>>({});
-  const [newEnvVar, setNewEnvVar] = useState({ name: '', value: '', isSecret: false });
-  
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingVar, setEditingVar] = useState<EnvVar | null>(null);
+
+  useEffect(() => {
+    // 这里应该从API获取环境变量
+    // 现在使用模拟数据
+    setEnvVars(MOCK_ENV_VARS);
+    setIsLoading(false);
+  }, []);
+
   // 过滤环境变量
-  const filteredEnvVars = MOCK_ENV_VARS.filter(env => 
-    env.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (!env.isSecret && env.value.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredEnvVars = envVars.filter(v => 
+    v.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    v.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // 处理环境变量操作
-  const handleEditEnvVar = (id: number) => {
-    const envVar = MOCK_ENV_VARS.find(env => env.id === id);
-    if (envVar) {
-      setNewEnvVar({ 
-        name: envVar.name, 
-        value: envVar.value, 
-        isSecret: envVar.isSecret 
-      });
-      setShowAddModal(true);
+  // 处理保存环境变量
+  const handleSaveEnvVar = async (envVar: EnvVar) => {
+    try {
+      // 这里应该调用API保存环境变量
+      // 现在只是模拟操作
+      setEnvVars(prevVars => 
+        prevVars.map(v => v.id === envVar.id ? {...envVar, updatedAt: new Date().toISOString()} : v)
+      );
+      setEditingVar(null);
+      toast.success(`变量 ${envVar.key} 已保存`);
+    } catch (error) {
+      toast.error('保存失败，请重试');
+      console.error('保存环境变量失败:', error);
     }
   };
 
-  const handleDeleteEnvVar = (id: number) => {
-    console.log(`Delete env var ${id}`);
-    toast.success('环境变量已删除');
-  };
-
-  const handleToggleVisibility = (id: number) => {
-    setVisibleValues(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-  };
-
+  // 处理添加环境变量
   const handleAddEnvVar = () => {
-    if (!newEnvVar.name || !newEnvVar.value) {
-      toast.error('名称和值不能为空');
-      return;
-    }
-    console.log('添加环境变量:', newEnvVar);
-    toast.success('环境变量已添加');
-    setShowAddModal(false);
-    setNewEnvVar({ name: '', value: '', isSecret: false });
+    const newVar: EnvVar = {
+      id: Math.max(...envVars.map(v => v.id), 0) + 1,
+      key: '',
+      value: '',
+      description: '',
+      isEncrypted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isSystem: false
+    };
+    setEditingVar(newVar);
+  };
+
+  // 编辑表单
+  const renderEditForm = () => {
+    if (!editingVar) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
+          <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              {editingVar.id ? '编辑环境变量' : '添加环境变量'}
+            </h3>
+            <button 
+              onClick={() => setEditingVar(null)}
+              className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+            >
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="px-6 py-4">
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="key" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  变量名
+                </label>
+                <input
+                  type="text"
+                  id="key"
+                  className="mt-1 input w-full"
+                  value={editingVar.key}
+                  onChange={(e) => setEditingVar({...editingVar, key: e.target.value})}
+                  placeholder="MY_VARIABLE_NAME"
+                />
+              </div>
+              <div>
+                <label htmlFor="value" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  变量值
+                </label>
+                <input
+                  type={editingVar.isEncrypted ? "password" : "text"}
+                  id="value"
+                  className="mt-1 input w-full"
+                  value={editingVar.value}
+                  onChange={(e) => setEditingVar({...editingVar, value: e.target.value})}
+                  placeholder="变量值"
+                />
+              </div>
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  描述
+                </label>
+                <textarea
+                  id="description"
+                  className="mt-1 input w-full"
+                  value={editingVar.description}
+                  onChange={(e) => setEditingVar({...editingVar, description: e.target.value})}
+                  placeholder="变量的用途描述"
+                  rows={3}
+                />
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isEncrypted"
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  checked={editingVar.isEncrypted}
+                  onChange={(e) => setEditingVar({...editingVar, isEncrypted: e.target.checked})}
+                />
+                <label htmlFor="isEncrypted" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  加密存储（推荐用于密钥和敏感信息）
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-end space-x-3">
+            <button 
+              onClick={() => setEditingVar(null)}
+              className="btn"
+            >
+              取消
+            </button>
+            <button 
+              onClick={() => handleSaveEnvVar(editingVar)}
+              className="btn btn-primary inline-flex items-center"
+              disabled={!editingVar.key || !editingVar.value}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              保存
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -181,23 +221,20 @@ export default function EnvPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">环境变量</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            管理您的脚本使用的环境变量
+            管理系统环境变量和配置
           </p>
         </div>
         <button 
-          onClick={() => {
-            setNewEnvVar({ name: '', value: '', isSecret: false });
-            setShowAddModal(true);
-          }}
+          onClick={handleAddEnvVar}
           className="btn btn-primary inline-flex items-center"
         >
-          <Plus className="mr-2 h-4 w-4" />
+          <Key className="mr-2 h-4 w-4" />
           添加变量
         </button>
       </div>
 
       <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="relative w-full sm:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -205,10 +242,22 @@ export default function EnvPage() {
             <input
               type="text"
               className="input pl-10 w-full"
-              placeholder="搜索环境变量..."
+              placeholder="搜索变量..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+          </div>
+          <div className="ml-auto">
+            <button
+              onClick={() => {
+                // 这里应该刷新环境变量
+                toast.success('变量已刷新');
+              }}
+              className="btn inline-flex items-center"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              刷新
+            </button>
           </div>
         </div>
 
@@ -217,13 +266,13 @@ export default function EnvPage() {
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  变量名称
+                  变量名
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   变量值
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  类型
+                  描述
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   更新时间
@@ -234,130 +283,102 @@ export default function EnvPage() {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
-              {filteredEnvVars.map((env) => (
-                <tr key={env.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 mr-3">
-                        <TerminalSquare className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                      </div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-white font-mono">
-                        {env.name}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white font-mono max-w-xs truncate">
-                      {env.isSecret 
-                        ? (visibleValues[env.id] ? env.value : '••••••••••••••••')
-                        : env.value
-                      }
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      ${env.isSecret 
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                      }
-                    `}>
-                      {env.isSecret ? (
-                        <>
-                          <Lock className="mr-1 h-3 w-3" />
-                          <span>加密</span>
-                        </>
-                      ) : (
-                        <>
-                          <Key className="mr-1 h-3 w-3" />
-                          <span>普通</span>
-                        </>
-                      )}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {env.updated}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <EnvVarActionMenu 
-                      onEdit={() => handleEditEnvVar(env.id)}
-                      onDelete={() => handleDeleteEnvVar(env.id)}
-                      isSecret={env.isSecret}
-                      onToggleVisibility={() => handleToggleVisibility(env.id)}
-                    />
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    加载中...
                   </td>
                 </tr>
-              ))}
+              ) : filteredEnvVars.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    没有找到环境变量
+                  </td>
+                </tr>
+              ) : (
+                filteredEnvVars.map((envVar) => (
+                  <tr key={envVar.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="p-2 rounded-full bg-primary-50 dark:bg-primary-900/20 mr-3">
+                          <Key className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {envVar.key}
+                          </div>
+                          {envVar.isSystem && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
+                              系统
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {envVar.isEncrypted ? (
+                          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <Lock className="h-4 w-4 mr-1" />
+                            <span>******</span>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-900 dark:text-white font-mono">
+                            {envVar.value}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {envVar.description}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(envVar.updatedAt).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => {
+                            // 编辑变量
+                            setEditingVar(envVar);
+                          }}
+                          className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-primary-600 dark:text-primary-400"
+                          title="编辑变量"
+                        >
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        {!envVar.isSystem && (
+                          <button
+                            onClick={() => {
+                              // 删除变量
+                              if (confirm(`确定要删除变量 ${envVar.key} 吗？`)) {
+                                setEnvVars(prevVars => prevVars.filter(v => v.id !== envVar.id));
+                                toast.success(`变量 ${envVar.key} 已删除`);
+                              }
+                            }}
+                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400"
+                            title="删除变量"
+                          >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* 添加/编辑环境变量模态框 */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full">
-            <div className="p-5 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                {newEnvVar.name ? '编辑环境变量' : '添加环境变量'}
-              </h3>
-            </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label htmlFor="env-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  变量名称
-                </label>
-                <input
-                  type="text"
-                  id="env-name"
-                  className="input w-full"
-                  placeholder="例如: API_KEY"
-                  value={newEnvVar.name}
-                  onChange={(e) => setNewEnvVar({ ...newEnvVar, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label htmlFor="env-value" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  变量值
-                </label>
-                <input
-                  type={newEnvVar.isSecret ? "password" : "text"}
-                  id="env-value"
-                  className="input w-full"
-                  placeholder="变量的值"
-                  value={newEnvVar.value}
-                  onChange={(e) => setNewEnvVar({ ...newEnvVar, value: e.target.value })}
-                />
-              </div>
-              <div className="flex items-center">
-                <input
-                  id="is-secret"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  checked={newEnvVar.isSecret}
-                  onChange={(e) => setNewEnvVar({ ...newEnvVar, isSecret: e.target.checked })}
-                />
-                <label htmlFor="is-secret" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                  标记为敏感数据（加密存储）
-                </label>
-              </div>
-            </div>
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="btn btn-outline"
-              >
-                取消
-              </button>
-              <button
-                onClick={handleAddEnvVar}
-                className="btn btn-primary"
-              >
-                保存
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {renderEditForm()}
     </AppLayout>
   );
 } 

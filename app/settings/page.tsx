@@ -55,7 +55,7 @@ function CopyButton({ text, label }: { text: string, label?: string }) {
       setCopied(true);
       toast.success('已复制到剪贴板');
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
+    } catch (error) {
       toast.error('复制失败，请手动复制');
     }
   };
@@ -75,11 +75,14 @@ function CopyButton({ text, label }: { text: string, label?: string }) {
   );
 }
 
+// 设置值类型
+type SettingValue = string | boolean | number;
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState(mockSettings);
   const [activeTab, setActiveTab] = useState('github');
   
-  const handleSettingsChange = (category: string, key: string, value: any) => {
+  const handleSettingsChange = (category: string, key: string, value: SettingValue) => {
     setSettings(prev => ({
       ...prev,
       [category]: {

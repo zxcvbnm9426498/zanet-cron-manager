@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Github, ArrowRight, Settings, AlertTriangle } from 'lucide-react';
+import { Github, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function GitHubIntegrationPrompt() {

@@ -5,7 +5,6 @@ import AppLayout from '@/components/layout/AppLayout';
 import { useAuth } from '@/context/AuthContext';
 import { 
   Github, 
-  Link as LinkIcon, 
   ExternalLink, 
   Check, 
   AlertTriangle, 
@@ -16,7 +15,7 @@ import {
 import { toast } from 'sonner';
 
 export default function GitHubSettingsPage() {
-  const { user, accessToken } = useAuth();
+  const { accessToken } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [showConfigInstructions, setShowConfigInstructions] = useState(false);
@@ -216,7 +215,7 @@ export default function GitHubSettingsPage() {
                   <h4 className="font-semibold text-gray-700 dark:text-gray-300">步骤 1: 创建 GitHub OAuth 应用</h4>
                   <ol className="list-decimal list-inside space-y-2 pl-2">
                     <li>前往 <a href="https://github.com/settings/developers" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-500 underline">GitHub 开发者设置</a></li>
-                    <li>点击 "New OAuth App" 按钮</li>
+                    <li>点击 &quot;New OAuth App&quot; 按钮</li>
                     <li>填写应用信息:
                       <ul className="list-disc list-inside pl-5 mt-1">
                         <li>Application name: Zanet Cron Manager</li>
@@ -225,7 +224,7 @@ export default function GitHubSettingsPage() {
                         <li>Authorization callback URL: <code className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{`${getDeployedDomain()}/api/auth/callback/github`}</code></li>
                       </ul>
                     </li>
-                    <li>点击 "Register application"</li>
+                    <li>点击 &quot;Register application&quot;</li>
                     <li>注册后，您将获得 Client ID 和 Client Secret</li>
                   </ol>
                 </div>

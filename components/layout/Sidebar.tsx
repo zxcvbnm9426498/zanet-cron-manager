@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { 
   CalendarClock, 
@@ -22,6 +23,13 @@ interface NavItem {
   name: string;
   href: string;
   icon: React.ElementType;
+}
+
+// 用户类型定义
+interface User {
+  name?: string;
+  login?: string;
+  avatar_url?: string;
 }
 
 const navigation: NavItem[] = [
@@ -74,7 +82,7 @@ export default function Sidebar() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <SidebarContent pathname={pathname} mobile={true} user={user} onLogout={logout} />
+              <SidebarContent pathname={pathname} user={user} onLogout={logout} />
             </motion.div>
           </motion.div>
         )}
@@ -83,7 +91,7 @@ export default function Sidebar() {
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-10 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-1 flex-col min-h-0 border-r border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800">
-          <SidebarContent pathname={pathname} mobile={false} user={user} onLogout={logout} />
+          <SidebarContent pathname={pathname} user={user} onLogout={logout} />
         </div>
       </div>
     </>
@@ -92,13 +100,11 @@ export default function Sidebar() {
 
 function SidebarContent({ 
   pathname, 
-  mobile, 
   user,
   onLogout
 }: { 
   pathname: string;
-  mobile: boolean;
-  user: any;
+  user: User | null;
   onLogout: () => void;
 }) {
   return (
@@ -114,10 +120,12 @@ function SidebarContent({
         <div className="mt-6 px-4">
           <div className="flex items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
             {user.avatar_url && (
-              <img 
+              <Image 
                 src={user.avatar_url} 
-                alt={user.name} 
-                className="h-8 w-8 rounded-full mr-2"
+                alt={user.name || 'User avatar'} 
+                width={32}
+                height={32}
+                className="rounded-full mr-2"
               />
             )}
             <div>

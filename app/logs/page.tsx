@@ -3,7 +3,6 @@
 import { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { 
-  History, 
   Search, 
   CalendarClock,
   Clock,
@@ -14,11 +13,21 @@ import {
   Trash2,
   Filter
 } from "lucide-react";
-import Link from "next/link";
 import { toast } from "sonner";
 
+// 定义日志类型
+type LogEntry = {
+  id: number;
+  taskName: string;
+  taskId: number;
+  executionTime: string;
+  duration: string;
+  status: 'success' | 'failed' | 'running';
+  output: string;
+};
+
 // 模拟日志数据
-const MOCK_LOGS = [
+const MOCK_LOGS: LogEntry[] = [
   { 
     id: 1, 
     taskName: "每日签到任务", 
@@ -67,7 +76,7 @@ const MOCK_LOGS = [
 ];
 
 // 日志详情弹窗组件
-function LogDetailModal({ log, onClose }: { log: any, onClose: () => void }) {
+function LogDetailModal({ log, onClose }: { log: LogEntry, onClose: () => void }) {
   if (!log) return null;
 
   return (
@@ -149,7 +158,7 @@ function LogDetailModal({ log, onClose }: { log: any, onClose: () => void }) {
 export default function LogsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
   
   // 过滤日志
   const filteredLogs = MOCK_LOGS.filter(log => {
@@ -162,7 +171,7 @@ export default function LogsPage() {
   });
 
   // 处理查看日志
-  const handleViewLog = (log: any) => {
+  const handleViewLog = (log: LogEntry) => {
     setSelectedLog(log);
   };
 

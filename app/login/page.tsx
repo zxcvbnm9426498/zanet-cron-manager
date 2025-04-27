@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Github, ArrowRight, Lock, User, UserPlus } from 'lucide-react';
+import { Github, Lock, User, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 
 // 登录表单类型

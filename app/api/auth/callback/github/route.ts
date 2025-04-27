@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-// 这些值应该从环境变量中获取
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID || 'your_client_id';
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET || 'your_client_secret';
-
 // 这个函数将处理GitHub OAuth回调
 export async function GET(request: NextRequest) {
   try {

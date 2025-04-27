@@ -10,9 +10,6 @@ import {
   Pause, 
   RefreshCcw, 
   Github, 
-  GitBranch, 
-  History,
-  Settings,
   FileCode,
   MoreVertical,
   Edit,
@@ -209,10 +206,9 @@ function WorkflowActionMenu({ workflow, onRun, onToggle, onEdit, onDelete }: {
 }
 
 export default function GitHubActionsPage() {
-  const { user, accessToken } = useAuth();
+  const { } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [repositories, setRepositories] = useState<string[]>([]);
   const [selectedRepo, setSelectedRepo] = useState<string>("");
 
@@ -222,7 +218,6 @@ export default function GitHubActionsPage() {
     // 现在使用模拟数据
     setWorkflows(MOCK_WORKFLOWS);
     setRepositories(['username/repo', 'username/another-repo']);
-    setIsLoading(false);
   }, []);
 
   // 过滤工作流

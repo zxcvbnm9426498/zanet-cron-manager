@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { findUser } from '../../../lib/users';
 
 export async function POST(request: Request) {
